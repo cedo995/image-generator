@@ -20,13 +20,44 @@ const CreatePost = () => {
     }
 
     const handleChange = (e) => {
-
+        setForm({ ...form, [e.target.name]: e.target.value })
     }
 
     const handleSurpriseMe = () => {
-
+        const randomPrompt = getRandomPrompt(form.prompt)
+        setForm({ ...form, prompt: randomPrompt })
     }
 
+    const generateImage = async () => {
+        if (form.prompt) {
+          try {
+            setGeneratingImg(true);
+            const response = await fetch('https://dalle-arbb.onrender.com/api/v1/dalle', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                prompt: form.prompt,
+              }),
+            });
+    
+            const data = await response.json();
+            setForm({ ...form, photo: `data:image/jpeg;base64,${data.photo}` });
+          } catch (err) {
+            alert(err);
+          } finally {
+            setGeneratingImg(false);
+          }
+        } else {
+          alert('Please provide proper prompt');
+        }
+      };
+
+
+            
+                    
+     
 
     return (
         <section className='max-w-7xl mx-auto'>
@@ -79,6 +110,25 @@ const CreatePost = () => {
                             </div>
                         )}
                     </div>
+                </div>
+
+                <div className='mt-5 flex gap-5'>
+                    <button
+                        type='button'
+                        onClick={generateImage}
+                        className='text-white bg-green-700 font-medium rounded-md text-sm w-full sm:w-auto px-5 py-2.5 text-center'
+                    >
+                        {generatingImg ? 'generating...' : 'generate'}
+                    </button>
+                </div>
+                <div className='mt-10'>
+                    <p className='mt-2 text-[#666e75] text-[14px]'>Once you have created the image you want, you can share it with others in the community</p>
+                    <button
+                        type='submit'
+                        className='mt-3 text-white bg-[#6469ff] font-medium rounded-md text-sm w-full sm:w-auto px-5 py-2.5 text-center'
+                    >
+                        {loading ? 'Sharing...' : 'Share with the community'}
+                    </button>
                 </div>
             </form>
         </section>
